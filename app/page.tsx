@@ -8,6 +8,7 @@ import { PieceSymbol, Square } from "chess.js";
 import { useChessGame } from "./chess/game/useChessGame";
 import { usePremoves } from "./chess/game/usePremoves";
 import { useEngine } from "./chess/engine/useEngine";
+import { useGameState } from "./chess/game/useGameState";
 import { ChessBoardView } from "./chess/ui/ChessBoardView";
 import { PromotionDialog } from "./chess/ui/usePromotionDialog";
 import { EvaluationBar } from "./chess/ui/EvaluationBar";
@@ -19,6 +20,7 @@ export default function Home() {
   // We can pass current FEN to engine if we want continuous evaluation, 
   // but for now we keep the original behavior of just initial eval or manual trigger if added.
   const { evaluation, evaluate, isReady, blunderMeter, setBlunderMeter } = useEngine();
+  const gameState = useGameState(game.chess);
 
   const [isRemovalMode, setIsRemovalMode] = useState(false);
   const [hintMove, setHintMove] = useState<string | null>(null);
@@ -368,6 +370,14 @@ export default function Home() {
     }
   };
 
+  // New Game: Reset the board to starting position
+  const newGame = () => {
+    game.reset();
+    premoves.clear();
+    setShowHint(false);
+    setHintMove(null);
+  };
+
 
 
 
@@ -453,14 +463,31 @@ export default function Home() {
             ))}
           </div>
 
+          {/* Game Result Display */}
+          {gameState.isGameOver && (
+            <div className="mb-4 p-4 bg-gradient-to-r from-neutral-800 to-neutral-900 border-2 border-white/20 rounded-lg text-center">
+              <div className="text-xl font-bold text-white mb-1">{gameState.result}</div>
+              <div className="text-sm text-neutral-400">{gameState.reason}</div>
+            </div>
+          )}
+
           {/* History Footer Actions */}
           <div className="mt-4 pt-4 border-t border-neutral-800 flex flex-col gap-2">
-            <button
-              onClick={() => regenerate()}
-              className="w-full px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded text-sm font-medium transition-colors border border-neutral-700"
-            >
-              Regenerate
-            </button>
+            {gameState.isGameOver ? (
+              <button
+                onClick={() => newGame()}
+                className="w-full px-4 py-2 bg-white text-black hover:bg-neutral-200 rounded text-sm font-bold transition-colors border border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+              >
+                New Game
+              </button>
+            ) : (
+              <button
+                onClick={() => regenerate()}
+                className="w-full px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded text-sm font-medium transition-colors border border-neutral-700"
+              >
+                Regenerate
+              </button>
+            )}
             <button
               onClick={() => copyFEN()}
               className="w-full px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded text-sm font-medium transition-colors border border-neutral-700"
