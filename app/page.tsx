@@ -29,7 +29,7 @@ export default function Home() {
   // Engine: Trigger search when it's NOT player's turn
   useEffect(() => {
     if (game.chess.turn() !== playerColor && !game.chess.isGameOver()) {
-      // user wanted depth 10 or 9
+      // Stockfish opponent plays at depth 10
       evaluate(game.position, 10);
     }
     // If it's white's turn, we might want to stop the engine or let it ponder?
@@ -586,7 +586,8 @@ export default function Home() {
             onClick={() => {
               if (game.chess.turn() === playerColor) {
                 setShowHint(true);
-                evaluate(game.position, 10);
+                // Hints use deeper search (depth 15) for better quality than opponent (depth 10)
+                evaluate(game.position, 12);
               }
             }}
             className="px-6 py-2 text-sm font-bold text-black bg-white rounded hover:bg-neutral-200 transition-all duration-200 shadow-[0_0_15px_rgba(255,255,255,0.2)] border border-transparent"
